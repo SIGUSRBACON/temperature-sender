@@ -11,14 +11,19 @@ def farenheight(celsius):
 SERVER = '10.12.24.1'
 PORT = 2003
 
-message = 'environment.{}.{} {} {}'
+message_domain = 'environment'
 
 for name, config in sensors.CONFIG.items():
     sock = socket.socket()
     sock.connect((SERVER, PORT))
     humidity, temperature = Adafruit_DHT.read_retry(config['type'], config['gpio'])
-    print(message.format(name, 'temperature', farenheight(temperature), int(time.time())))
-    print(message.format(name, 'humidity', humidity, int(time.time())))
-    sock.sendall(message.format(name, 'temperature', farenheight(temperature), int(time.time())).encode('utf-8'))
-    sock.sendall(message.format(name, 'humidity', humidity, int(time.time())).encode('utf-8'))
+
+    message = '%s.%s.%s %s %s\n' % ( message_domain, name, 'temperature', farenheight(temperature), int(time.time()) )
+    print(message)
+    sock.send(message.encode('utf-8'))
+
+    message = '%s.%s.%s %s %s\n' % ( message_domain, name, 'humidity', humidity, int(time.time()) )
+    print(message)
+    sock.send(message.encode('utf-8'))
+
     sock.close()
